@@ -180,9 +180,9 @@ final class WCMp {
         
         // Init WCMp API
         $this->init_wcmp_rest_api();
-
-        if (!wp_next_scheduled('migrate_multivendor_table') && !get_option('multivendor_table_migrated', false)) {
-            wp_schedule_event(time(), 'hourly', 'migrate_multivendor_table');
+        
+        if (!wp_next_scheduled('migrate_spmv_multivendor_table') && !get_option('spmv_multivendor_table_migrated', false)) {
+            wp_schedule_event(time(), 'hourly', 'migrate_spmv_multivendor_table');
         }
         do_action('wcmp_init');
     }
@@ -525,7 +525,8 @@ final class WCMp {
         global $WCMp;
         $stripe_dependencies = WC_Dependencies_Product_Vendor::stripe_dependencies();
         if($stripe_dependencies['status']){
-            if(!class_exists("Stripe\Stripe")) {
+            $load_library = (get_wcmp_vendor_settings('payment_method_stripe_masspay', 'payment') == 'Enable') ? true : false;
+            if(!class_exists("Stripe\Stripe") && apply_filters('wcmp_load_stripe_library', $load_library)) {
                 require_once( $this->plugin_path . 'lib/Stripe/init.php' );
             }
         }else{
